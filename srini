@@ -18,3 +18,16 @@ On the GitLab Runner
 Linux environment (Ubuntu, RHEL, or similar)
 
 Installed packages:
+⚡ Variables
+
+File: roles/controlm_agent/vars/main.yml
+
+Adding Windows Support (Future)
+
+Once Windows EC2s are available:
+
+Enable WinRM connectivity in Ansible.
+
+Add them under a windows_agents group in hosts.yml.
+
+Implement roles/controlm_agent/tasks/windows.yml, for example:
