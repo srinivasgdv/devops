@@ -1,28 +1,4 @@
-⚙️ Overview
-
-This project automates the deployment of the BMC Control-M Agent using:
-
-Ansible — to install, configure, and start the agent on target servers.
-
-GitLab CI/CD — to automate validation (ansible-lint) and deployment (ansible-playbook).
-
-Currently supported:
-
-✅ RHEL / CentOS 7, 8, 9
-
-🕓 Windows Server (coming soon)
-
-🧰 Requirements
-On the GitLab Runner
-
-Linux environment (Ubuntu, RHEL, or similar)
-
-Installed packages:
-⚡ Variables
-
-File: roles/controlm_agent/vars/main.yml
-
-Adding Windows Support (Future)
+🧩 Adding Windows Support (Future)
 
 Once Windows EC2s are available:
 
@@ -31,3 +7,10 @@ Enable WinRM connectivity in Ansible.
 Add them under a windows_agents group in hosts.yml.
 
 Implement roles/controlm_agent/tasks/windows.yml, for example:
+
+🧾 License
+
+BMC Control-M is a licensed product — ensure compliance with Concentra’s license agreements.
+
+Author: DevOps Engineering
+Purpose: Automated Control-M Agent deployment on hybrid infrastructure (RHEL → Windows)
