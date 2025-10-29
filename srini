@@ -1,28 +1,20 @@
-# 🚀 Control-M Agent Deployment with GitLab CI + Ansible
+⚙️ Overview
 
-This repository automates the installation and configuration of **Control-M Agents** on **RHEL** (and later Windows) servers using **Ansible**, orchestrated by **GitLab CI/CD**.
+This project automates the deployment of the BMC Control-M Agent using:
 
----
+Ansible — to install, configure, and start the agent on target servers.
 
-## 📁 Project Structure
+GitLab CI/CD — to automate validation (ansible-lint) and deployment (ansible-playbook).
 
-```text
-controlm-deploy/
-├── .gitlab-ci.yml                # GitLab pipeline definition
-├── README.md                     # Documentation (this file)
-├── ansible/
-│   ├── deploy_controlm.yml        # Main playbook
-│   ├── inventory/
-│   │   └── hosts.yml             # Target host definitions
-│   ├── group_vars/
-│   │   └── all.yml               # Global variables (if any)
-│   ├── roles/
-│   │   └── controlm_agent/
-│   │       ├── tasks/
-│   │       │   ├── main.yml      # OS detection and include
-│   │       │   ├── linux.yml     # RHEL deployment tasks
-│   │       │   └── windows.yml   # Windows deployment tasks (future)
-│   │       ├── templates/
-│   │       │   └── agent_config.j2
-│   │       └── vars/
-│   │           └── main.yml
+Currently supported:
+
+✅ RHEL / CentOS 7, 8, 9
+
+🕓 Windows Server (coming soon)
+
+🧰 Requirements
+On the GitLab Runner
+
+Linux environment (Ubuntu, RHEL, or similar)
+
+Installed packages:
