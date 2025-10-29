@@ -1,16 +1,29 @@
-🧩 Adding Windows Support (Future)
+---
+- name: Ensure install script exists
+  copy:
+    src: files/install.sh
+    dest: /opt/controlm/install.sh
+    mode: '0755'
 
-Once Windows EC2s are available:
+- name: Run Control-M Agent install script
+  command: >
+    /opt/controlm/install.sh
+    --agent-name {{ agent_name }}
+    --controlm-server {{ controlm_server }}
+    --controlm-port {{ controlm_port }}
+  register: install_output
 
-Enable WinRM connectivity in Ansible.
+- debug:
+    msg: "{{ install_output.stdout_lines }}"
 
-Add them under a windows_agents group in hosts.yml.
+- name: Configure Control-M Agent
+  template:
+    src: agent_config.j2
+    dest: /opt/controlm/ctm/data/CONFIG.dat
+    mode: '0644'
 
-Implement roles/controlm_agent/tasks/windows.yml, for example:
-
-🧾 License
-
-BMC Control-M is a licensed product — ensure compliance with Concentra’s license agreements.
-
-Author: DevOps Engineering
-Purpose: Automated Control-M Agent deployment on hybrid infrastructure (RHEL → Windows)
+- name: Start Control-M Agent service
+  systemd:
+    name: controlm-agent
+    state: started
+    enabled: yes
