@@ -1,1 +1,126 @@
-This is a test file.
+Sure — let’s set up a GitLab CI/CD pipeline (.gitlab-ci.yml) that deploys a Control-M Agent using Ansible.
+
+We’ll assume the following:
+
+You have an Ansible playbook for installing and configuring the Control-M Agent.
+
+The GitLab Runner has access to your Ansible control node (or can run Ansible directly).
+
+SSH keys are configured for connecting to your target hosts.
+
+🧩 Folder Structure Example
+
+controlm-deploy/
+├── .gitlab-ci.yml
+├── ansible/
+│   ├── inventory/
+│   │   └── hosts.yml
+│   ├── roles/
+│   │   └── controlm_agent/
+│   │       ├── tasks/
+│   │       │   └── main.yml
+│   │       ├── templates/
+│   │       │   └── agent_config.j2
+│   │       └── vars/
+│   │           └── main.yml
+│   └── deploy_controlm.yml
+
+Example .gitlab-ci.yml
+stages:
+  - lint
+  - deploy
+
+variables:
+  ANSIBLE_HOST_KEY_CHECKING: "False"
+  ANSIBLE_FORCE_COLOR: "True"
+
+before_script:
+  - apt-get update -y && apt-get install -y ansible sshpass
+
+lint:
+  stage: lint
+  script:
+    - ansible-lint ansible/deploy_controlm.yml
+  only:
+    - merge_requests
+    - main
+
+deploy_controlm_agent:
+  stage: deploy
+  script:
+    - ansible-playbook -i ansible/inventory/hosts.yml ansible/deploy_controlm.yml
+  environment:
+    name: production
+  only:
+    - main
+
+Example ansible/deploy_controlm.yml Playbook
+---
+- name: Deploy Control-M Agent
+  hosts: controlm_agents
+  become: yes
+  vars_files:
+    - roles/controlm_agent/vars/main.yml
+
+  roles:
+    - controlm_agent
+
+Example Role: roles/controlm_agent/tasks/main.yml
+---
+- name: Ensure Control-M Agent install directory exists
+  file:
+    path: /opt/controlm
+    state: directory
+    mode: '0755'
+
+- name: Copy Control-M Agent installation package
+  copy:
+    src: /path/to/packages/controlm-agent.tar.gz
+    dest: /opt/controlm/
+    mode: '0644'
+
+- name: Extract Control-M Agent package
+  unarchive:
+    src: /opt/controlm/controlm-agent.tar.gz
+    dest: /opt/controlm/
+    remote_src: yes
+
+- name: Run Control-M Agent silent installer
+  command: >
+    /opt/controlm/install.sh
+    --accept-license
+    --agent-name={{ agent_name }}
+    --controlm-server={{ controlm_server }}
+    --controlm-port={{ controlm_port }}
+  args:
+    chdir: /opt/controlm
+  register: install_output
+
+- debug:
+    msg: "{{ install_output.stdout_lines }}"
+
+- name: Configure Control-M Agent
+  template:
+    src: agent_config.j2
+    dest: /opt/controlm/agent/config/agent.cfg
+    mode: '0644'
+
+- name: Start Control-M Agent service
+  service:
+    name: controlm-agent
+    state: started
+    enabled: yes
+
+Example Inventory ansible/inventory/hosts.yml
+all:
+  children:
+    controlm_agents:
+      hosts:
+        agent1.example.com:
+        agent2.example.com:
+
+Example Role Vars roles/controlm_agent/vars/main.yml
+agent_name: "{{ inventory_hostname }}"
+controlm_server: "controlm.example.com"
+controlm_port: 7005
+
